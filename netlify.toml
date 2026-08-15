@@ -1,0 +1,26 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Explicit routing. The functions also declare these paths themselves, but
+# older Netlify build images ignore that, which shows up as a 404 at /api/*.
+[[redirects]]
+  from = "/api/closet"
+  to = "/.netlify/functions/closet"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/tag"
+  to = "/.netlify/functions/tag"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
