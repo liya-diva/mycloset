@@ -87,4 +87,4 @@ export default async (req) => {
   }
 };
 
-export const config = { path: "/api/closet" };
+export const config = { path: "/api/tag" };
