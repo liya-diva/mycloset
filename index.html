@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
 <title>The Rail — wardrobe</title>
+<!-- build: v3-diagnostic -->
 <style>
   html, body { margin: 0; padding: 0; background: #F7F3EA; }
   #root { min-height: 100vh; }
@@ -20,7 +21,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
 </head>
 <body>
-<div id="root"><div id="boot">Opening the closet…</div></div>
+<div id="root"><div id="boot">Opening the closet… (build v3)</div></div>
 <script>
   window.addEventListener("error", function (e) {
     var r = document.getElementById("boot");
@@ -467,20 +468,21 @@ async function callBase(base, path, init) {
 
 async function api(path, init) {
   let res;
+  const tried = [];
   if (API_BASE) {
     res = await callBase(API_BASE, path, init);
+    tried.push(`${API_BASE}${path} -> ${res.status}`);
   } else {
     for (const base of BASES) {
       res = await callBase(base, path, init);
+      tried.push(`${base}${path} -> ${res.status}`);
       if (res.status !== 404) { API_BASE = base; break; }
     }
   }
   if (res.status === 401) { const e = new Error("Wrong passphrase."); e.auth = true; throw e; }
   if (res.status === 404) {
-    throw new Error(
-      "The server functions are not deployed. Check that netlify/functions/closet.mjs is in " +
-      "the repo and that the Functions tab lists two functions, then redeploy."
-    );
+    // Report exactly what was attempted so the cause is visible rather than guessed at.
+    throw new Error("No endpoint answered. Tried: " + tried.join("  |  "));
   }
   if (!res.ok) {
     let msg = `Server returned ${res.status}.`;
